@@ -36,7 +36,7 @@ import os
 import PySpin
 import sys
 
-NUM_IMAGES = 10  # number of images to grab
+NUM_IMAGES = 1  # number of images to grab
 
 
 def acquire_images(cam, nodemap, nodemap_tldevice):
