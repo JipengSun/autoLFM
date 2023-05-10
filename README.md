@@ -4,10 +4,10 @@ Controller for FLIR camera capture and Optune ETL focal length adjustment to aut
 
 ## Reference Doc:
 
-FLIR Camera:
+*FLIR Camera:
 
-[SDK Package](https://www.flir.com/support-center/iis/machine-vision/downloads/spinnaker-sdk-download/spinnaker-sdk--download-files/)
+1. [SDK Package](https://www.flir.com/support-center/iis/machine-vision/downloads/spinnaker-sdk-download/spinnaker-sdk--download-files/)
 
-Optune ETL:
+*Optune ETL:
 
-[Github Repo](https://github.com/OrganicIrradiation/opto)
+1. [Github Repo](https://github.com/OrganicIrradiation/opto)
