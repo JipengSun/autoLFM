@@ -7,9 +7,11 @@ import numpy as np
 
 from Python3.CounterAndTimer import print_device_info, setup_counter_and_timer, configure_digital_io, reset_trigger
 
-saved_image_path = 'saved_images/'
+saved_image_path = 'saved_images/current_control/'
 NUM_IMAGES = 2  # number of images to grab
 
+o = Opto(port='COM4')
+o.connect()
 
 def configure_exposure_and_trigger(nodemap,exposure_time):
     """
@@ -109,7 +111,7 @@ def configure_exposure_and_trigger(nodemap,exposure_time):
 
     return result
 
-def acquire_images(cam, nodemap, nodemap_tldevice):
+def acquire_images(cam, nodemap, nodemap_tldevice, capture_path):
     """
     This function acquires and saves 10 images from a device; please see
     Acquisition example for more in-depth comments on acquiring images.
@@ -186,9 +188,10 @@ def acquire_images(cam, nodemap, nodemap_tldevice):
                     else:  # if serial number is empty
                         filename = 'CounterAndTimer-{}.jpg'.format(i)
 
+                    final_path_file_name = capture_path + filename
                     #  Save image
-                    image_converted.Save(filename)
-                    print('Image saved at {}'.format(filename))
+                    image_converted.Save(final_path_file_name)
+                    print('Image saved at {}'.format(final_path_file_name))
 
                     #  Release image
                     image_result.Release()
@@ -253,7 +256,7 @@ def release_cam(cam_list,system):
 
     input('Done! Press Enter to exit...')
 
-def run_single_camera(cam, exposure_time):
+def run_single_camera(cam, exposure_time, capture_path):
     """
     This function acts as the body of the example; please see the NodeMapInfo example
     for more in-depth comments on setting up cameras.
@@ -293,7 +296,7 @@ def run_single_camera(cam, exposure_time):
             return result
 
         # Acquire images
-        result &= acquire_images(cam, nodemap, nodemap_tldevice)
+        result &= acquire_images(cam, nodemap, nodemap_tldevice, capture_path)
 
         # Reset trigger
         result &= reset_trigger(nodemap)
@@ -307,13 +310,13 @@ def run_single_camera(cam, exposure_time):
 
     return result
 
-def camera_pipeline(cam_list,exposure_time):
+def camera_pipeline(cam_list,exposure_time,capture_path):
 
     for i, cam in enumerate(cam_list):
 
         print('Running example for camera {}...'.format(i))
 
-        run_single_camera(cam,exposure_time)
+        run_single_camera(cam,exposure_time,capture_path)
 
         print('Camera {} example complete... \n'.format(i))
 
@@ -329,12 +332,29 @@ if __name__ == '__main__':
 
     print('Current list steps: ',current_list)
     print('Steps in total: ',len(current_list))
+   
 
     system, cam_list = config_camera()
 
+    #python program to check if a path exists
+    #if it doesn’t exist we create one
+    capture_path = saved_image_path+'{}_{}_{}/'.format(min_etl_current,max_etl_current,current_step)
+    if not os.path.exists(capture_path):
+        os.makedirs(capture_path)
+
     for current in current_list:
         print("Current current level: ", current)
-        cam = camera_pipeline(cam_list,exposure_time)
+
+        o.current(float(current))
+
+        current_path = capture_path + '{}/'.format(current)
+
+        if not os.path.exists(current_path):
+            os.makedirs(current_path)
+
+        cam = camera_pipeline(cam_list,exposure_time,current_path)
+
         del cam
     
+    o.close(soft_close=True)
     release_cam(cam_list,system)
