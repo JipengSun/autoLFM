@@ -110,7 +110,6 @@ def acquire_images(cam, nodemap, nodemap_tldevice):
                 #  buffer from filling up.
                 image_result = cam.GetNextImage(1000)
                 chunk_data = image_result.GetChunkData()
-                CFloatPtr ptrExposureTime = nodeMap.GetNode("ExposureTime");
                 print(chunk_data.GetExposureTime())
 
                 #  Ensure image completion
