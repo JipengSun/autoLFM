@@ -1,40 +1,7 @@
-# coding=utf-8
-# =============================================================================
-# Copyright (c) 2001-2019 FLIR Systems, Inc. All Rights Reserved.
-#
-# This software is the confidential and proprietary information of FLIR
-# Integrated Imaging Solutions, Inc. ("Confidential Information"). You
-# shall not disclose such Confidential Information and shall use it only in
-# accordance with the terms of the license agreement you entered into
-# with FLIR Integrated Imaging Solutions, Inc. (FLIR).
-#
-# FLIR MAKES NO REPRESENTATIONS OR WARRANTIES ABOUT THE SUITABILITY OF THE
-# SOFTWARE, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE
-# IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
-# PURPOSE, OR NON-INFRINGEMENT. FLIR SHALL NOT BE LIABLE FOR ANY DAMAGES
-# SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR DISTRIBUTING
-# THIS SOFTWARE OR ITS DERIVATIVES.
-# =============================================================================
-#
-# Acquisition.py shows how to acquire images. It relies on
-# information provided in the Enumeration example. Also, check out the
-# ExceptionHandling and NodeMapInfo examples if you haven't already.
-# ExceptionHandling shows the handling of standard and Spinnaker exceptions
-# while NodeMapInfo explores retrieving information from various node types.
-#
-# This example touches on the preparation and cleanup of a camera just before
-# and just after the acquisition of images. Image retrieval and conversion,
-# grabbing image data, and saving images are all covered as well.
-#
-# Once comfortable with Acquisition, we suggest checking out
-# AcquisitionMultipleCamera, NodeMapCallback, or SaveToAvi.
-# AcquisitionMultipleCamera demonstrates simultaneously acquiring images from
-# a number of cameras, NodeMapCallback serves as a good introduction to
-# programming with callbacks and events, and SaveToAvi exhibits video creation.
-
 import os
 import PySpin
 import sys
+
 
 NUM_IMAGES = 1  # number of images to grab
 
@@ -142,6 +109,9 @@ def acquire_images(cam, nodemap, nodemap_tldevice):
                 #  needed, the image must be released in order to keep the
                 #  buffer from filling up.
                 image_result = cam.GetNextImage(1000)
+                chunk_data = image_result.GetChunkData()
+                CFloatPtr ptrExposureTime = nodeMap.GetNode("ExposureTime");
+                print(chunk_data.GetExposureTime())
 
                 #  Ensure image completion
                 #
