@@ -8,10 +8,10 @@ import numpy as np
 from Python3.CounterAndTimer import print_device_info, setup_counter_and_timer, configure_digital_io, reset_trigger
 
 saved_image_path = 'saved_images/current_control/'
-NUM_IMAGES = 2  # number of images to grab
+NUM_IMAGES = 1  # number of images to grab
 
-o = Opto(port='COM4')
-o.connect()
+#o = Opto(port='COM4')
+#o.connect()
 
 def configure_exposure_and_trigger(nodemap,exposure_time):
     """
@@ -111,7 +111,7 @@ def configure_exposure_and_trigger(nodemap,exposure_time):
 
     return result
 
-def acquire_images(cam, nodemap, nodemap_tldevice, capture_path):
+def acquire_images(cam, nodemap, nodemap_tldevice, capture_path, exposure_time):
     """
     This function acquires and saves 10 images from a device; please see
     Acquisition example for more in-depth comments on acquiring images.
@@ -184,7 +184,7 @@ def acquire_images(cam, nodemap, nodemap_tldevice, capture_path):
 
                     # Create a unique filename
                     if device_serial_number:
-                        filename = 'CounterAndTimer-{}-{}.jpg'.format(device_serial_number, i)
+                        filename = 'CounterAndTimer-{}-{}-{}.jpg'.format(device_serial_number, i, exposure_time)
                     else:  # if serial number is empty
                         filename = 'CounterAndTimer-{}.jpg'.format(i)
 
@@ -296,7 +296,7 @@ def run_single_camera(cam, exposure_time, capture_path):
             return result
 
         # Acquire images
-        result &= acquire_images(cam, nodemap, nodemap_tldevice, capture_path)
+        result &= acquire_images(cam, nodemap, nodemap_tldevice, capture_path, exposure_time)
 
         # Reset trigger
         result &= reset_trigger(nodemap)
@@ -310,23 +310,25 @@ def run_single_camera(cam, exposure_time, capture_path):
 
     return result
 
-def camera_pipeline(cam_list,exposure_time,capture_path):
+def camera_pipeline(cam_list,exposure_time_list,capture_path):
 
     for i, cam in enumerate(cam_list):
+        for exposure_time in exposure_time_list:
 
-        print('Running example for camera {}...'.format(i))
+            print('Running example for camera {}...'.format(i))
 
-        run_single_camera(cam,exposure_time,capture_path)
+            run_single_camera(cam,exposure_time,capture_path)
 
-        print('Camera {} example complete... \n'.format(i))
+            print('Camera {} example complete... \n'.format(i))
 
     return cam
 
 if __name__ == '__main__':
-    min_etl_current = -250
-    max_etl_current = 250
-    current_step = 50
-    exposure_time = 4000
+    min_etl_current = -50
+    max_etl_current = 50
+    current_step = 10
+    exposure_time_list = [4000,8000,12000]
+    #exposure_time = 4000
 
     current_list = np.arange(min_etl_current, max_etl_current+1 , current_step).tolist()
 
@@ -345,16 +347,16 @@ if __name__ == '__main__':
     for current in current_list:
         print("Current current level: ", current)
 
-        o.current(float(current))
+        #o.current(float(current))
 
         current_path = capture_path + '{}/'.format(current)
 
         if not os.path.exists(current_path):
             os.makedirs(current_path)
 
-        cam = camera_pipeline(cam_list,exposure_time,current_path)
+        cam = camera_pipeline(cam_list,exposure_time_list,current_path)
 
         del cam
     
-    o.close(soft_close=True)
+    #o.close(soft_close=True)
     release_cam(cam_list,system)
