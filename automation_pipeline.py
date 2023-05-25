@@ -8,6 +8,7 @@ import numpy as np
 from Python3.CounterAndTimer import print_device_info, setup_counter_and_timer, configure_digital_io, reset_trigger
 
 saved_image_path = 'saved_images/current_control/'
+#saved_image_path = 'saved_images/dpt_control/'
 NUM_IMAGES = 1  # number of images to grab
 
 o = Opto(port='COM3')
@@ -325,30 +326,49 @@ def camera_pipeline(cam_list,exposure_time_list,capture_path):
     return cam
 
 if __name__ == '__main__':
+    
+    
     min_etl_current = -100
     max_etl_current = 100
-    current_step = 50
-    exposure_time_list_all_cam = [[100000],[10000]]
-    #exposure_time = 4000
-
+    current_step = 10
     current_list = np.arange(min_etl_current, max_etl_current+1 , current_step).tolist()
 
     print('Current list steps: ',current_list)
     print('Steps in total: ',len(current_list))
+    
+    '''
+    min_dpt = 0
+    max_dpt = 5
+    dpt_step = 0.5
+    dpt_list = (np.arange(min_dpt, max_dpt+0.1 , dpt_step).astype(np.uint16)).tolist()
+    print('Current list steps: ',dpt_list)
+    print('Steps in total: ',len(dpt_list))
+    '''
+
+    exposure_time_list_all_cam = [[100000],[25000]]
+    #exposure_time = 4000
+
+    
+
+    
    
 
     system, cam_list = config_camera()
 
     #python program to check if a path exists
     #if it doesn’t exist we create one
+
     capture_path = saved_image_path+'{}_{}_{}/'.format(min_etl_current,max_etl_current,current_step)
+    #capture_path = saved_image_path+'{}_{}_{}/'.format(min_dpt,max_dpt,dpt_step)
     if not os.path.exists(capture_path):
         os.makedirs(capture_path)
 
+    
     for current in current_list:
         print("Current current level: ", current)
 
-        o.current(float(current))
+        #o.current(float(current))
+        o.focalpower(float(current))
 
         current_path = capture_path + '{}/'.format(current)
 
@@ -359,5 +379,21 @@ if __name__ == '__main__':
 
         del cam
     
+    '''
+    for focal_dpt in dpt_list:
+        print("Current focal power in dpt: ", focal_dpt)
+
+        #o.current(float(current))
+        o.focalpower(float(focal_dpt))
+
+        current_path = capture_path + '{}/'.format(focal_dpt)
+
+        if not os.path.exists(current_path):
+            os.makedirs(current_path)
+
+        cam = camera_pipeline(cam_list,exposure_time_list_all_cam,current_path)
+
+        del cam
+    '''
     o.close(soft_close=True)
     release_cam(cam_list,system)
