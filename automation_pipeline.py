@@ -2,7 +2,7 @@ import os
 import PySpin
 import sys
 from opto import Opto
-
+import time
 import numpy as np
 
 from Python3.CounterAndTimer import print_device_info, setup_counter_and_timer, configure_digital_io, reset_trigger
@@ -10,8 +10,8 @@ from Python3.CounterAndTimer import print_device_info, setup_counter_and_timer, 
 saved_image_path = 'saved_images/current_control/'
 NUM_IMAGES = 1  # number of images to grab
 
-#o = Opto(port='COM4')
-#o.connect()
+o = Opto(port='COM3')
+o.connect()
 
 def configure_exposure_and_trigger(nodemap,exposure_time):
     """
@@ -266,6 +266,7 @@ def run_single_camera(cam, exposure_time, capture_path):
     :return: True if successful, False otherwise.
     :rtype: bool
     """
+    #time.sleep(10)
     try:
         result = True
 
@@ -313,7 +314,7 @@ def run_single_camera(cam, exposure_time, capture_path):
 def camera_pipeline(cam_list,exposure_time_list,capture_path):
 
     for i, cam in enumerate(cam_list):
-        for exposure_time in exposure_time_list:
+        for exposure_time in exposure_time_list[i]:
 
             print('Running example for camera {}...'.format(i))
 
@@ -324,10 +325,10 @@ def camera_pipeline(cam_list,exposure_time_list,capture_path):
     return cam
 
 if __name__ == '__main__':
-    min_etl_current = -50
-    max_etl_current = 50
-    current_step = 10
-    exposure_time_list = [4000,8000,12000]
+    min_etl_current = -100
+    max_etl_current = 100
+    current_step = 50
+    exposure_time_list_all_cam = [[100000],[10000]]
     #exposure_time = 4000
 
     current_list = np.arange(min_etl_current, max_etl_current+1 , current_step).tolist()
@@ -347,16 +348,16 @@ if __name__ == '__main__':
     for current in current_list:
         print("Current current level: ", current)
 
-        #o.current(float(current))
+        o.current(float(current))
 
         current_path = capture_path + '{}/'.format(current)
 
         if not os.path.exists(current_path):
             os.makedirs(current_path)
 
-        cam = camera_pipeline(cam_list,exposure_time_list,current_path)
+        cam = camera_pipeline(cam_list,exposure_time_list_all_cam,current_path)
 
         del cam
     
-    #o.close(soft_close=True)
+    o.close(soft_close=True)
     release_cam(cam_list,system)
