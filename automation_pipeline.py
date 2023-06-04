@@ -131,6 +131,9 @@ def acquire_images(cam, nodemap, nodemap_tldevice, capture_path, exposure_time):
     try:
         result = True
 
+        '''
+        CONTINOUS MODE!!!
+
         # Set acquisition mode to continuous
         node_acquisition_mode = PySpin.CEnumerationPtr(nodemap.GetNode('AcquisitionMode'))
         if not PySpin.IsAvailable(node_acquisition_mode) or not PySpin.IsWritable(node_acquisition_mode):
@@ -149,26 +152,36 @@ def acquire_images(cam, nodemap, nodemap_tldevice, capture_path, exposure_time):
 
         print('Acquisition mode set to continuous...')
 
-        #  Begin acquiring images
-        cam.BeginAcquisition()
+        '''
 
-        print('Acquiring images...')
+        acq_mode = PySpin.CEnumerationPtr(nodemap.GetNode('AcquisitionMode'))
+        acq_mode_single_frame = acq_mode.GetEntryByName('SingleFrame')
+        acq_mode.SetIntValue(acq_mode_single_frame.GetValue())
 
-        #  Retrieve device serial number for filename
-        device_serial_number = ''
-        node_device_serial_number = PySpin.CStringPtr(nodemap_tldevice.GetNode('DeviceSerialNumber'))
-        if PySpin.IsAvailable(node_device_serial_number) and PySpin.IsReadable(node_device_serial_number):
-            device_serial_number = node_device_serial_number.GetValue()
-            print('Device serial number retrieved as {}...'.format(device_serial_number))
+        
 
-        print('')
+        
 
         # Retrieve, convert, and save images
         for i in range(NUM_IMAGES):
+
+            #  Begin acquiring images
+            cam.BeginAcquisition()
+
+            print('Acquiring images...')
+
+            #  Retrieve device serial number for filename
+            device_serial_number = ''
+            node_device_serial_number = PySpin.CStringPtr(nodemap_tldevice.GetNode('DeviceSerialNumber'))
+            if PySpin.IsAvailable(node_device_serial_number) and PySpin.IsReadable(node_device_serial_number):
+                device_serial_number = node_device_serial_number.GetValue()
+                print('Device serial number retrieved as {}...'.format(device_serial_number))
+
+            print('')
             try:
 
                 #  Retrieve next received image and ensure image completion
-                image_result = cam.GetNextImage(1000)
+                image_result = cam.GetNextImage(10000)
 
                 if image_result.IsIncomplete():
                     print('Image incomplete with image status {} ...'.format(image_result.GetImageStatus()))
@@ -202,8 +215,8 @@ def acquire_images(cam, nodemap, nodemap_tldevice, capture_path, exposure_time):
                 print('Error: {}'.format(ex))
                 return False
 
-        #  End acquisition
-        cam.EndAcquisition()
+            #  End acquisition
+            cam.EndAcquisition()
 
     except PySpin.SpinnakerException as ex:
         print('Error: {}'.format(ex))
@@ -346,7 +359,7 @@ if __name__ == '__main__':
     print('Steps in total: ',len(dpt_list))
     '''
 
-    exposure_time_list_all_cam = [[100000],[25000]]
+    exposure_time_list_all_cam = [[9e6],[25000]]
     #exposure_time = 4000
 
 
