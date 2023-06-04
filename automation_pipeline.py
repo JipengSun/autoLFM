@@ -9,7 +9,7 @@ from Python3.CounterAndTimer import print_device_info, setup_counter_and_timer, 
 
 saved_image_path = 'saved_images/current_control/'
 #saved_image_path = 'saved_images/dpt_control/'
-NUM_IMAGES = 1  # number of images to grab
+NUM_IMAGES = 5  # number of images to grab
 
 o = Opto(port='COM3')
 o.connect()
@@ -316,6 +316,7 @@ def camera_pipeline(cam_list,exposure_time_list,capture_path):
 
     for i, cam in enumerate(cam_list):
         for exposure_time in exposure_time_list[i]:
+            
 
             print('Running example for camera {}...'.format(i))
 
@@ -330,7 +331,7 @@ if __name__ == '__main__':
     
     min_etl_current = -100
     max_etl_current = 100
-    current_step = 10
+    current_step = 50
     current_list = np.arange(min_etl_current, max_etl_current+1 , current_step).tolist()
 
     print('Current list steps: ',current_list)
@@ -348,10 +349,6 @@ if __name__ == '__main__':
     exposure_time_list_all_cam = [[100000],[25000]]
     #exposure_time = 4000
 
-    
-
-    
-   
 
     system, cam_list = config_camera()
 
@@ -367,14 +364,16 @@ if __name__ == '__main__':
     for current in current_list:
         print("Current current level: ", current)
 
-        #o.current(float(current))
-        o.focalpower(float(current))
+        
+        o.current(float(current))
+        #o.focalpower(float(current))
 
         current_path = capture_path + '{}/'.format(current)
 
         if not os.path.exists(current_path):
             os.makedirs(current_path)
 
+        
         cam = camera_pipeline(cam_list,exposure_time_list_all_cam,current_path)
 
         del cam
